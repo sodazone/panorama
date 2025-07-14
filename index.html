@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Panorama - Polkadot Flows</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Primary Meta -->
+    <meta name="title" content="Panorama - Polkadot Flows" />
+    <meta
+      name="description"
+      content="Visualize Polkadot cross-chain activity with a dynamic arc diagram. Explore volume flows between parachains in style."
+    />
+
+    <!-- Open Graph / Facebook / Discord -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://panorama.xcscan.io/" />
+    <meta property="og:title" content="Panorama - Polkadot Flows" />
+    <meta
+      property="og:description"
+      content="Visualize Polkadot cross-chain activity with a dynamic arc diagram. Explore volume flows between parachains in style."
+    />
+    <meta
+      property="og:image"
+      content="https://panorama.xcscan.io/og_1200x628.png"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="628" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://panorama.xcscan.io/" />
+    <meta name="twitter:title" content="Panorama - Polkadot Flows" />
+    <meta
+      name="twitter:description"
+      content="Visualize Polkadot cross-chain activity with a dynamic arc diagram. Explore volume flows between parachains in style."
+    />
+    <meta
+      name="twitter:image"
+      content="https://panorama.xcscan.io/og_1200x628.png"
+    />
+
+    <!-- Favicons -->
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/favicon/favicon-16x16.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/favicon/favicon-32x32.png"
+    />
+
+    <!-- Fonts and Styles -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+
+  <body>
+    <div class="top-bar">
+      <div class="top-bar-content">
+        <a href="/">
+          <div class="logo">
+            <img src="/dot_logo.svg" width="100%" height="100%" alt="" />
+          </div>
+        </a>
+        <a href="/">
+          <div class="title">
+            <span>Panorama</span>
+            <span>Polkadot Flows</span>
+          </div>
+        </a>
+        <nav class="nav-links">
+          <a href="https://xcscan.io/">Explorer</a>
+          <a href="https://analytics.xcscan.io/">Analytics</a>
+        </nav>
+      </div>
+    </div>
+    <div id="chart-title">
+      <div>Networks by</div>
+      <div id="order-select">
+        <select id="sort-select">
+          <option value="volume">USD Volume</option>
+          <option value="degree">Num. Channels</option>
+        </select>
+      </div>
+      <div>over</div>
+      <div id="time-select">
+        <select id="time-select">
+          <option value="90D">90 days</option>
+          <option value="30D">30 days</option>
+          <option value="7D">7 days</option>
+          <option value="1D">1 day</option>
+        </select>
+      </div>
+    </div>
+    <div id="chart-tools">
+      <div id="zoom-wrapper">
+        <div id="zoom-controls" class="button-group"></div>
+      </div>
+    </div>
+    <div class="chart-zone">
+      <svg id="chart"></svg>
+    </div>
+
+    <div id="infobox">
+      <div id="infobox-toggle" class="mobile-header">
+        <h2>Network Details</h2>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 16 16"
+          fill="currentColor"
+          width="16"
+          height="16"
+          class="expand-indicator"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z"
+            clip-rule="evenodd"
+          />
+        </svg>
+      </div>
+      <div id="infobox-content"></div>
+    </div>
+
+    <div id="initial-infobox">
+      <div class="header">
+        <h2>Networks</h2>
+        <button id="initial-infobox-close">&times;</button>
+      </div>
+      <ul id="initial-infobox-network-list">
+        <li class="network-header skeleton"></li>
+      </ul>
+    </div>
+
+    <div class="info-container">
+      <div class="info-icon" tabindex="0" aria-label="Information">?</div>
+      <div class="tooltip" role="tooltip">
+        <p><strong>What you're seeing</strong></p>
+        <p>
+          This is an arc diagram visualization of the Polkadot ecosystem
+          networks. Each node represents a network, arranged linearly for
+          clarity.
+        </p>
+        <p>
+          The arcs connecting nodes show the volume of USD transferred between
+          them over your selected time frame. The thickness and direction of
+          each arc reflect the magnitude and flow of transfers, helping you
+          intuitively grasp cross-network value movement and relationships.
+        </p>
+        <p>
+          Click on any node to dive deeper and highlight its specific
+          connections.
+        </p>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

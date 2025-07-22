@@ -1,3 +1,11 @@
+function debounce(fn, delay = 100) {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn(...args), delay);
+  };
+}
+
 export function drawSparkline(conf) {
   function setup(opts) {
     const defaultOpts = {
@@ -84,6 +92,15 @@ export function drawSparkline(conf) {
   requestAnimationFrame(() => {
     render(opts);
   });
+
+  const ro = new ResizeObserver(
+    debounce(() => {
+      if (container.offsetParent !== null) {
+        render(opts);
+      }
+    }, 100),
+  );
+  ro.observe(container);
 
   return container;
 }

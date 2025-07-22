@@ -89,10 +89,6 @@ export function drawSparkline(conf) {
   container.className = "w-full h-full sparkline";
   container.appendChild(opts.svg);
 
-  requestAnimationFrame(() => {
-    render(opts);
-  });
-
   const ro = new ResizeObserver(
     debounce(() => {
       if (container.offsetParent !== null) {

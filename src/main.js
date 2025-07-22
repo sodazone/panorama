@@ -29,6 +29,7 @@ import {
   minWidth,
   nodeSpacing,
 } from "./consts.js";
+import { installNavMenu } from "./menu.js";
 
 const infoBox = select("#infobox");
 const infoBoxToggle = document.getElementById("infobox-toggle");
@@ -500,5 +501,7 @@ window.addEventListener("resize", () => {
     updateNodePositions();
   }
 });
+
+installNavMenu();
 
 loadData();

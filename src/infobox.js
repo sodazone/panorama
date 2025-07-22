@@ -3,23 +3,34 @@ import { select } from "https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm";
 import { formatCompactNumber, nodeNameWithIcon } from "./format";
 import { state } from "./state";
 import { isElementVisibleInContainer, nodeId } from "./utils";
+import { drawSparkline } from "./sparkline";
 
 const initialInfobox = select("#initial-infobox");
 const initialInfoboxNetworksList = select("#initial-infobox-network-list");
 
+function sparklineHTML(series) {
+  if (!series || !series.length) return "";
+  return `<div class="sparkline" data-gap="1" data-strokeWidth="1" data-colors="#559999" data-points='${series.map((p) => p.value).join(",")}'></div>`;
+}
+
 function createPowerbarHTML(d, percent) {
-  return `
-          <div class="power-bar-bg">
+  return `<div class="power-bar-bg">
             <div style="width: ${percent}%; background-color: ${d.color}; height: 100%; opacity: 0.9;"></div>
           </div>`;
 }
 
+function getNetworkLink({ id }) {
+  return encodeURI(`/network/index.html#urn:ocn:${id}`);
+}
+
 function createNetworkHeaderHTML(d) {
   const percent = ((d.volume / state.totalVolume) * 100).toFixed(1);
-
   return `<div class="header">
     <div class="title">
-      <span>${nodeNameWithIcon(d, 32)}</span>
+      <a href="${getNetworkLink(d)}" target="_blank" class="title-link">
+        ${nodeNameWithIcon(d, 32)}
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+      </a>
       <button id="infobox-close">&times;</button>
     </div>
     <div class="power-bar">
@@ -119,6 +130,18 @@ function displayInitialInfobox() {
 const infoBox = select("#infobox");
 const infoContent = select("#infobox-content");
 
+function addSparklines() {
+  infoContent.selectAll(".sparkline").each(function () {
+    const el = this;
+
+    if (!el.dataset.points?.length) return;
+
+    const spark = drawSparkline(el);
+    el.innerHTML = "";
+    el.appendChild(spark);
+  });
+}
+
 function displayInfobox(d, { onClose }) {
   const groupedLinks = {};
   state.cachedData.links.forEach((l) => {
@@ -163,32 +186,38 @@ function displayInfobox(d, { onClose }) {
 
       const outRow =
         outVol || outTx
-          ? `<div>
-       <span class="channel-path">
+          ? `<div style="position:relative;height:3.5rem;">
+                    <div class="sparkline-container">
+                ${sparklineHTML(directions.out?.series)}
+          </div>
+      <span class="channel-path">
         <span>${d.name}</span>
         ${arrowRight}
         <span>${node.name}</span>
-       </span>
-       <span style="display:flex;flex-direction:column;gap:2px;text-align:right;">
-         ${outVol ? `<span class="volume"><strong>$${formatCompactNumber(outVol)}</strong></span>` : ""}
-         ${outTx ? `<span class="tx-count">${formatCompactNumber(outTx, 0)} tx</span>` : ""}
-       </span>
-     </div>`
+      </span>
+      <span class="channel-metrics" style="display:flex;flex-direction:column;gap:2px;text-align:right;">
+        ${outVol ? `<span class="volume"><strong>$${formatCompactNumber(outVol)}</strong></span>` : ""}
+        ${outTx ? `<span class="tx-count">${formatCompactNumber(outTx, 0)} tx</span>` : ""}
+      </span>
+    </div>`
           : "";
 
       const inRow =
         inVol || inTx
-          ? `<div>
-       <span class="channel-path">
+          ? `<div style="position:relative;height:3.5rem;">
+          <div class="sparkline-container">
+                ${sparklineHTML(directions.in?.series)}
+          </div>
+      <span class="channel-path">
         <span>${node.name}</span>
         ${arrowRight}
         <span>${d.name}</span>
-       </span>
-       <span style="display:flex;flex-direction:column;gap:2px;text-align:right;">
-         ${inVol ? `<span class="volume"><strong>$${formatCompactNumber(inVol)}</strong></span>` : ""}
-         ${inTx ? `<span class="tx-count">${formatCompactNumber(inTx, 0)} tx</span>` : ""}
-       </span>
-     </div>`
+      </span>
+      <span class="channel-metrics" style="display:flex;flex-direction:column;gap:2px;text-align:right;">
+        ${inVol ? `<span class="volume"><strong>$${formatCompactNumber(inVol)}</strong></span>` : ""}
+        ${inTx ? `<span class="tx-count">${formatCompactNumber(inTx, 0)} tx</span>` : ""}
+      </span>
+    </div>`
           : "";
 
       return `
@@ -206,6 +235,8 @@ function displayInfobox(d, { onClose }) {
   infoContent.html(`${createNetworkHeaderHTML(d)}
     ${relatedHtml || ""}
   `);
+
+  addSparklines();
 
   infoBox.style("display", "block").style("opacity", 1);
 

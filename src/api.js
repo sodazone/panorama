@@ -2,6 +2,13 @@ const url = "https://dev-api.ocelloids.net/query/xcm";
 const apiKey =
   "eyJhbGciOiJFZERTQSIsImtpZCI6IklSU1FYWXNUc0pQTm9kTTJsNURrbkJsWkJNTms2SUNvc0xBRi16dlVYX289In0.ewogICJpc3MiOiAiZGV2LWFwaS5vY2VsbG9pZHMubmV0IiwKICAianRpIjogIjAxMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwIiwKICAic3ViIjogInB1YmxpY0BvY2VsbG9pZHMiCn0K.bjjQYsdIN9Fx34S9Of5QSKxb8_aOtwURInOGSSc_DxrdZcnYWi-5nnZsh1v5rYWuRWNzLstX0h1ICSH_oAugAQ";
 
+const BUCKET_OPTS = {
+  "3 months": { bucketSeconds: 86400, totalBuckets: 90 },
+  "1 months": { bucketSeconds: 86400, totalBuckets: 30 },
+  "7 days": { bucketSeconds: 21600, totalBuckets: 28 },
+  "1 days": { bucketSeconds: 3600, totalBuckets: 24 },
+};
+
 const TIME_MAP = {
   "90D": {
     timeframe: "3 months",
@@ -25,7 +32,45 @@ const EXCLUDE = ["urn:ocn:paseo:0", "urn:ocn:paseo:1000"];
 
 const CACHE_EXPIRY_MS = 60 * 60 * 1000; // 1 hour
 
-function transformArcDiagram(data) {
+function fillMissingBuckets(series, options) {
+  if (!series.length) return [];
+
+  const { bucketSeconds, totalBuckets } = options;
+  const map = Object.fromEntries(series.map((d) => [d.time, d.value]));
+
+  let start, end;
+
+  if (options.startTime != null && options.endTime != null) {
+    start = options.startTime;
+    end = options.endTime;
+  } else if (series.length) {
+    const times = series.map((d) => d.time);
+    const minTime = Math.min(...times);
+    const maxTime = Math.max(...times);
+
+    if (totalBuckets) {
+      end = Math.ceil(maxTime / bucketSeconds) * bucketSeconds;
+      start = end - bucketSeconds * (totalBuckets - 1);
+    } else {
+      start = Math.floor(minTime / bucketSeconds) * bucketSeconds;
+      end = Math.ceil(maxTime / bucketSeconds) * bucketSeconds;
+    }
+  } else if (totalBuckets) {
+    const now = Math.floor(Date.now() / 1000);
+    end = Math.floor(now / bucketSeconds) * bucketSeconds;
+    start = end - bucketSeconds * (totalBuckets - 1);
+  }
+
+  const filled = [];
+  for (let t = start; t <= end; t += bucketSeconds) {
+    filled.push({ time: t, value: map[t] ?? 0 });
+  }
+
+  return filled;
+}
+
+function transformArcDiagram(data, { timeframe }) {
+  const bucketOpts = BUCKET_OPTS[timeframe];
   const nodesSet = new Set();
   const links = [];
 
@@ -41,12 +86,15 @@ function transformArcDiagram(data) {
     nodesSet.add(from);
     nodesSet.add(to);
 
+    const filledSeries = fillMissingBuckets(item.series, bucketOpts);
+
     links.push({
       source: from,
       target: to,
       volume: item.volumeUsd,
       transfers: item.total,
       id: item.key,
+      series: filledSeries,
     });
   });
 
@@ -55,7 +103,7 @@ function transformArcDiagram(data) {
   return { nodes, links };
 }
 
-async function _fetch(time) {
+async function _fetch(criteria) {
   return await fetch(url, {
     method: "POST",
     headers: {
@@ -65,7 +113,7 @@ async function _fetch(time) {
     body: JSON.stringify({
       args: {
         op: "transfers_by_channel_series",
-        criteria: TIME_MAP[time],
+        criteria,
       },
     }),
   });
@@ -88,6 +136,7 @@ function getCacheKey(time) {
 
 export async function fetchSeries(time) {
   try {
+    const criteria = TIME_MAP[time];
     if (hasLocalStorage()) {
       const cacheKey = getCacheKey(time);
       const cached = localStorage.getItem(cacheKey);
@@ -98,9 +147,9 @@ export async function fetchSeries(time) {
         }
       }
 
-      const response = await _fetch(time);
+      const response = await _fetch(criteria);
       if (response.ok) {
-        const data = transformArcDiagram(await response.json());
+        const data = transformArcDiagram(await response.json(), criteria);
         localStorage.setItem(
           cacheKey,
           JSON.stringify({ timestamp: Date.now(), data }),
@@ -109,9 +158,9 @@ export async function fetchSeries(time) {
       }
       return null;
     } else {
-      const response = await _fetch(time);
+      const response = await _fetch(criteria);
       if (response.ok) {
-        return transformArcDiagram(await response.json());
+        return transformArcDiagram(await response.json(), criteria);
       }
       return null;
     }

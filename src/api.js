@@ -1,6 +1,12 @@
-const url = "https://dev-api.ocelloids.net/query/xcm";
-const apiKey =
-  "eyJhbGciOiJFZERTQSIsImtpZCI6IklSU1FYWXNUc0pQTm9kTTJsNURrbkJsWkJNTms2SUNvc0xBRi16dlVYX289In0.ewogICJpc3MiOiAiZGV2LWFwaS5vY2VsbG9pZHMubmV0IiwKICAianRpIjogIjAxMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwIiwKICAic3ViIjogInB1YmxpY0BvY2VsbG9pZHMiCn0K.bjjQYsdIN9Fx34S9Of5QSKxb8_aOtwURInOGSSc_DxrdZcnYWi-5nnZsh1v5rYWuRWNzLstX0h1ICSH_oAugAQ";
+import { apiKey, httpUrl } from "./env";
+
+const url = `${httpUrl}/query/xcm`;
+const headers = Object.assign(
+  {
+    "Content-Type": "application/json",
+  },
+  apiKey ? { Authorization: `Bearer ${apiKey}` } : {},
+);
 
 const BUCKET_OPTS = {
   "3 months": { bucketSeconds: 86400, totalBuckets: 90 },
@@ -106,10 +112,7 @@ function transformArcDiagram(data, { timeframe }) {
 async function _fetch(criteria) {
   return await fetch(url, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
+    headers,
     body: JSON.stringify({
       args: {
         op: "transfers_by_channel_series",

@@ -48,7 +48,6 @@ svg
   .attr("fill", "url(#diagram-bg-gradient)")
   .lower();
 
-// Zoom
 const zoomLayer = setupZoom(svg);
 
 function renderGraph() {
@@ -65,7 +64,6 @@ function renderGraph() {
   );
   const contentHeight = Math.max(minHeight, window.innerHeight);
 
-  // Center node Y
   const nodeY = contentHeight / 2;
 
   graph.nodes.forEach((n, i) => {
@@ -82,14 +80,12 @@ function renderGraph() {
   const translateY = (window.innerHeight - contentHeight) / 2;
   zoomLayer.attr("transform", `translate(${translateX}, ${translateY})`);
 
-  // Create a map of node id -> node for easy link source/target mapping
   const idToNode = Object.fromEntries(graph.nodes.map((n) => [n.id, n]));
   graph.links.forEach((l) => {
     l.source = idToNode[l.source] || l.source;
     l.target = idToNode[l.target] || l.target;
   });
 
-  // Node aggregates
   const nodeDegrees = {};
   const nodeVolumes = {};
   graph.nodes.forEach((n) => {
@@ -205,7 +201,7 @@ function renderGraph() {
     .append("g")
     .attr("transform", (d) => `translate(${d.x},${d.y})`);
 
-  // ARC GAUGE
+  // Arc gauge
   const outerRadius = iconSize / 2 + 9;
   const innerRadius = iconSize / 2 + 6;
   const gauge = arc()
@@ -213,7 +209,7 @@ function renderGraph() {
     .outerRadius(outerRadius)
     .startAngle(0);
 
-  // BACKGROUND CIRCLE (full 100%)
+  // Bg circle
   node
     .append("path")
     .attr("class", "gauge-bg")
@@ -221,7 +217,7 @@ function renderGraph() {
     .attr("fill", "rgba(255,255,255,0.08)")
     .style("pointer-events", "none");
 
-  // FOREGROUND ARC (share %)
+  // Fg arc (share %)
   node
     .append("path")
     .attr("class", "gauge-arc")
@@ -232,7 +228,7 @@ function renderGraph() {
     .attr("opacity", 0.75)
     .style("pointer-events", "none");
 
-  // ICON BG
+  // Icon bg
   node
     .append("circle")
     .attr("class", "selectable")
@@ -243,7 +239,7 @@ function renderGraph() {
     .append("title")
     .text((d) => d.name);
 
-  // ICON constant-size network icon
+  // Icon
   node
     .append("image")
     .attr("class", "node-icon")
@@ -480,7 +476,7 @@ document.getElementById("time-select").addEventListener("change", (e) => {
   loadData();
 });
 
-// only enable toggle on mobile
+// Only enable toggle on mobile
 function updateToggleBehavior() {
   if (window.innerWidth < 768) {
     infoBoxToggle.onclick = () => {

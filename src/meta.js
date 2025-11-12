@@ -107,6 +107,11 @@ export const networkMetadata = {
     color: "#7A808A",
     img: `${CDN_URL}/kusama/1005/icon.svg`,
   },
+  "ethereum:1": {
+    name: "Ethereum",
+    color: "#50C878",
+    img: `${CDN_URL}/ethereum/1/icon.svg`,
+  },
   "paseo:0": {
     name: "Paseo",
     color: "#FF8C00",

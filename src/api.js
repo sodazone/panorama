@@ -9,6 +9,7 @@ const headers = Object.assign(
 );
 
 const BUCKET_OPTS = {
+  "6 months": { bucketSeconds: 86400, totalBuckets: 180 },
   "3 months": { bucketSeconds: 86400, totalBuckets: 90 },
   "1 months": { bucketSeconds: 86400, totalBuckets: 30 },
   "7 days": { bucketSeconds: 21600, totalBuckets: 28 },
@@ -16,6 +17,10 @@ const BUCKET_OPTS = {
 };
 
 const TIME_MAP = {
+  "180D": {
+    timeframe: "6 months",
+    bucket: "1 days",
+  },
   "90D": {
     timeframe: "3 months",
     bucket: "1 days",

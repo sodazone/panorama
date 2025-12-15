@@ -2,7 +2,7 @@ const state = (() => {
   let _totalVolume = 0;
   let _cachedData = null;
   let _currentSort = "volume";
-  let _currentTimeframe = "90D";
+  let _currentTimeframe = "180D";
 
   return {
     get totalVolume() {
